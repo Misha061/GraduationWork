@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 450px; margin: 50px auto; text-align: center;">
+    <h2 style="color: #2e7d32;"><i class="fa-solid fa-user-plus"></i> Реєстрація</h2>
+    
+    <form method="POST" style="text-align: left;">
+        {% csrf_token %}
+        <!-- Django автоматично виведе всі поля реєстрації -->
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn-main" style="width: 100%; margin-top: 15px;">Створити акаунт</button>
+    </form>
+    
+    <div style="margin-top: 20px;">
+        Вже є акаунт? <a href="{% url 'login' %}">Увійти</a>
+    </div>
+</div>
+{% endblock %}

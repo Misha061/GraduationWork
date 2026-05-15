@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 20px auto;">
+    <h2 style="color: #2e7d32;"><i class="fa-solid fa-gear"></i> Налаштування профілю</h2>
+
+    {% if messages %}
+        <div style="color: #4CAF50; margin-bottom: 15px; font-weight: bold;">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            
+           
+            <div style="flex: 1; min-width: 300px; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                <h3><i class="fa-solid fa-id-card"></i> Дані акаунту</h3>
+                <div style="margin-bottom: 15px;">
+                    <label>Ваше Ім'я:</label>
+                    {{ form.first_name }}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Новий пароль:</label>
+                    {{ form.password }}
+                </div>
+            </div>
+        
+            <div style="flex: 1; min-width: 300px; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                <h3><i class="fa-solid fa-tower-observation"></i> Моніторинг</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label>Обране місто:</label>
+                    <select name="gorod_select">
+                        <option value="none">--- Оберіть місто ---</option>
+                        {% for g in goroda %}
+                            <option value="{{ g.id }}" {% if profile.izbranniy_gorod_id == g.id %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+    <label>Інтервал оновлення:</label>
+    <select name="interval">
+        
+        <option value="1" {% if profile.update_interval == 1 %}selected{% endif %}>1 година</option>
+        <option value="3" {% if profile.update_interval == 3 %}selected{% endif %}>3 години</option>
+        <option value="24" {% if profile.update_interval == 24 %}selected{% endif %}>24 години</option>
+    </select>
+</div>
+
+                <div style="margin-top: 20px;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" name="notifs" {% if profile.send_notifs %}checked{% endif %} style="width: 20px; margin: 0;">
+                        Отримувати Email сповіщення при небезпеці
+                    </label>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn-main" style="margin-top: 20px; width: 100%;"><i class="fa-solid fa-floppy-disk"></i> Зберегти зміни</button>
+    </form>
+</div>
+    
+{% if profile.izbranniy_gorod %}
+<div class="card" style="max-width: 800px; margin: 20px auto;">
+    <h3><i class="fa-solid fa-clock-rotate-left"></i> Історія показників: {{ profile.izbranniy_gorod.name }}</h3>
+    
+    {% if history_data %}
+        <table style="width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ccc; background: #f4f7f6;">
+                    <th style="padding: 12px;">Час заміру</th>
+                    <th style="padding: 12px;">PM2.5</th>
+                    <th style="padding: 12px;">PM10</th>
+                    <th style="padding: 12px;">Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history_data %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;">{{ item.vremya|date:"d.m.Y H:i" }}</td>
+                    <td style="padding: 12px; font-weight: bold;">{{ item.pm25_val }}</td>
+                    <td style="padding: 12px; font-weight: bold;">{{ item.pm10_val }}</td>
+                    <td style="padding: 12px;">
+                        {% if item.pm25_val > 25 %}
+                            <span style="color: white; background-color: #d32f2f; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Небезпечно</span>
+                        {% else %}
+                            <span style="color: white; background-color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Норма</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color: #666; font-style: italic;">Для цього міста ще немає зібраних даних з датчиків.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

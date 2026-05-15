@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h2><i class="fa-solid fa-gauge-high text-primary"></i> AI Control Panel</h2>
+            <div class="text-end">
+                <span class="badge {% if state.is_training %}bg-warning animate-pulse{% else %}bg-success{% endif %} p-2">
+                    {% if state.is_training %}СИСТЕМА В РЕЖИМІ НАВЧАННЯ{% else %}СИСТЕМА СТАБІЛЬНА{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Управління моделлю</h5>
+                    <hr>
+                    {% if state.is_training %}
+                        <div class="text-center py-3">
+                            <p class="mb-1">Виконується епоха: <b><span id="epoch-cur">{{ state.current_epoch }}</span>/{{ state.total_epochs }}</b></p>
+                            <div class="progress mb-3" style="height: 30px;">
+                                <div id="admin-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                     style="width: {{ state.progress }}%;">{{ state.progress }}%</div>
+                            </div>
+                            <small class="text-muted">Прогнози на сайті тимчасово заблоковані</small>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'trigger_retrain' %}" class="btn btn-primary w-100 mb-2">
+                            <i class="fa-solid fa-play"></i> Запустити перенавчання
+                        </a>
+                        {% if backup_exists %}
+                        <a href="{% url 'rollback_model' %}" class="btn btn-outline-danger w-100" onclick="return confirm('Відкотитися до попередньої версії?')">
+                            <i class="fa-solid fa-undo"></i> Відновити бекап (.h5)
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header">Лог останніх епох (MSE)</div>
+                <div class="card-body p-0">
+                    <canvas id="lossChart" class="p-2"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold">Порівняння: Прогноз vs Реальність</div>
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Район</th>
+                                <th>Прогноз (+1г)</th>
+                                <th>Факт (API)</th>
+                                <th>Відхилення</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in comparisons %}
+                            <tr>
+                                <td>{{ item.location }}</td>
+                                <td class="text-primary fw-bold">{{ item.pred_pm25 }}</td>
+                                <td class="text-dark fw-bold">{{ item.real_pm25 }}</td>
+                                <td>{{ item.diff }}</td>
+                                <td>
+                                    {% if item.diff < 5 %}
+                                        <span class="badge bg-success">Точно</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Похибка</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted">Чекаємо на підтвердження нових прогнозів...</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Графік Loss
+    const ctx = document.getElementById('lossChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [{% for log in logs reversed %}'{{ log.epochs }}',{% endfor %}],
+            datasets: [{
+                label: 'Training Loss',
+                data: [{% for log in logs reversed %}{{ log.loss }},{% endfor %}],
+                borderColor: '#198754',
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(25, 135, 84, 0.1)'
+            }]
+        },
+        options: { plugins: { legend: { display: false } } }
+    });
+
+    // Опитування прогресу
+    {% if state.is_training %}
+    function checkProgress() {
+        fetch('{% url "api_training_status" %}')
+            .then(r => r.json())
+            .then(data => {
+                if (data.is_training) {
+                    document.getElementById('admin-progress-bar').style.width = data.progress + '%';
+                    document.getElementById('admin-progress-bar').innerText = data.progress + '%';
+                    document.getElementById('epoch-cur').innerText = data.epoch;
+                    setTimeout(checkProgress, 2000);
+                } else {
+                    location.reload();
+                }
+            });
+    }
+    checkProgress();
+    {% endif %}
+</script>
+{% endblock %}

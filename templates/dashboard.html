@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="flex: 1; min-width: 300px;">
+        <div class="card">
+            <h3><i class="fa-solid fa-location-dot" style="color: #e53935;"></i> Оберіть місто</h3>
+            <select id="citySelector" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px;">
+                <option value="none">--- Оберіть зі списку ---</option>
+                {% for g in goroda %}
+                    <option value="{{ g.id }}" 
+                            data-lat="{{ g.lat }}" 
+                            data-lon="{{ g.lon }}"
+                            {% if user_city and user_city.id == g.id %}selected{% endif %}>
+                        {{ g.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <h3><i class="fa-regular fa-clock" style="color: #1976d2;"></i> Оберіть час</h3>
+            <select id="timeSelector" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                <option value="now">Останні дані (Зараз)</option>
+                {% for h in "0123456789"|make_list %}<option value="{{ h }}">{{ h }}:00</option>{% endfor %}
+                {% for h in "1011121314151617181920212223"|make_list|slice:":24" %}
+                    {% endfor %}
+                <option value="0">00:00</option><option value="1">01:00</option><option value="2">02:00</option>
+                <option value="3">03:00</option><option value="4">04:00</option><option value="5">05:00</option>
+                <option value="6">06:00</option><option value="7">07:00</option><option value="8">08:00</option>
+                <option value="9">09:00</option><option value="10">10:00</option><option value="11">11:00</option>
+                <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
+                <option value="15">15:00</option><option value="16">16:00</option><option value="17">17:00</option>
+                <option value="18">18:00</option><option value="19">19:00</option><option value="20">20:00</option>
+                <option value="21">21:00</option><option value="22">22:00</option><option value="23">23:00</option>
+            </select>
+        </div>
+
+        <div id="statsCard" class="card" style="display: none;">
+            <h3 id="cityName">Місто</h3>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span><i class="fa-solid fa-smog"></i> PM2.5 (Середнє):</span>
+                <strong><span id="pm25_val" style="color: #d32f2f;">--</span> µg/m³</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <span><i class="fa-solid fa-wind"></i> PM10 (Середнє):</span>
+                <strong><span id="pm10_val" style="color: #f57c00;">--</span> µg/m³</strong>
+            </div>
+            <hr>
+            <div style="margin-top: 15px; background: #e8f5e9; padding: 10px; border-radius: 8px;">
+                <p style="margin: 0; color: #2e7d32; font-size: 0.9em;">
+                    <i class="fa-solid fa-brain"></i> Прогноз LSTM (1 год): <br>
+                    <strong><span id="forecast">Немає даних</span> µg/m³</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div style="flex: 3; min-width: 500px;">
+        <div id="map" style="height: 400px; border-radius: 8px; border: 1px solid #ccc;"></div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 20px;">
+    <h3><i class="fa-solid fa-list-ul"></i> Історія забруднення (кожні 3 години)</h3>
+    <div id="historyList" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px;">
+        <div style="text-align: center; color: #888; padding: 20px;">Оберіть місто для перегляду історії</div>
+    </div>
+</div>
+{% endblock %}
+
+<script id="django-initial-data" type="application/json">
+    {{ initial_data_json|safe }}
+</script>
+
+{% block scripts %}
+    <script src="{% static 'js/map_logic.js' %}"></script>
+{% endblock %}List" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px

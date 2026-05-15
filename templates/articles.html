@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 900px; margin: 20px auto;">
+    <h2 style="color: #2e7d32; margin-bottom: 5px;">
+        <i class="fa-solid fa-leaf"></i> Екологічні статті та новини
+    </h2>
+    <p style="color: #666; margin-bottom: 25px;">Актуальна інформація про якість повітря та збереження довкілля.</p>
+
+    {% if articles %}
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for article in articles %}
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #4CAF50; box-shadow: var(--shadow-sm); transition: transform 0.2s ease;">
+                    
+                    
+                    <h3 style="margin-top: 0; margin-bottom: 10px; color: #333;">
+                        {{ article.zagolovok }}
+                    </h3>
+                    
+                    
+                    <div style="font-size: 0.85em; color: #888; margin-bottom: 12px;">
+                        <i class="fa-regular fa-clock"></i> {{ article.data_pub|date:"d.m.Y H:i" }}
+                    </div>
+                    
+                    
+                    <p style="color: #555; line-height: 1.5; margin-bottom: 15px;">
+                        {{ article.soderzhanie|truncatewords:30 }}
+                    </p>
+                    
+                    <!-- Кнопка переходу за посиланням -->
+                    <a href="{{ article.url_article }}" target="_blank" style="display: inline-block; background: #e8f5e9; color: #2e7d32; padding: 8px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; border: 1px solid #4CAF50; transition: all 0.3s ease;">
+                        Читати повністю <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.9em; margin-left: 5px;"></i>
+                    </a>
+                    
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <i class="fa-regular fa-folder-open" style="font-size: 3em; color: #ccc; margin-bottom: 15px;"></i>
+            <p>Наразі немає опублікованих статей.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -9,7 +9,7 @@ from django.views.generic import UpdateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import EcoArticle, UserProfile, Forecast
 from .models import SystemState, ModelTrainingLog
-from .utils import get_city_wide_ai_forecast
+from .utils import get_city_wide_ai_forecast, get_location_name_by_coords
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ObjectDoesNotExist
 from .models import CityArea, AirSensorData
@@ -353,26 +353,49 @@ class ForecastAnalysisView(TemplateView):
 
 def proverka_i_otpravka_uvedomleniy(sensor_zapis):
     NORMA_PM25_WHO = 25.0
+    now = timezone.now()
 
     if sensor_zapis.pm25_val > NORMA_PM25_WHO:
+        rayon = get_location_name_by_coords(sensor_zapis.lat, sensor_zapis.lon)
         zainteresovannie_ludi = UserProfile.objects.filter(
             izbranniy_gorod=sensor_zapis.city,
             send_notifs=True
         )
 
-        spisok_pocht = [prof.chelovek.email for prof in zainteresovannie_ludi if prof.chelovek.email]
+        people_for_sharing = []
 
-        if spisok_pocht:
-            try:
+        for prof in zainteresovannie_ludi:
+            if not prof.last_notif_sent or now >= prof.last_notif_sent + timedelta(hours=prof.update_interval):
+                people_for_sharing .append(prof)
+
+        if people_for_sharing :
+            t = threading.Thread(
+                target=send_bulk_emails,
+                args=(people_for_sharing , sensor_zapis, rayon)
+            )
+            t.start()
+
+
+def send_bulk_emails(users, data, rayon):
+    for prof in users:
+        try:
+            user_email = prof.chelovek.email
+            if user_email:
                 send_mail(
-                    subject=f'Увага! Забруднення повітря: {sensor_zapis.city.name}',
-                    message=f'Зафіксовано перевищення норми!\nПоточний рівень PM2.5: {sensor_zapis.pm25_val} µg/m³.\nРекомендуємо зачинити вікна та обмежити перебування на вулиці.',
+                    subject=f'⚠️ Увага: Забруднення у районі {rayon}',
+                    message=(
+                        f"Рівень PM2.5 у місті {data.city.name} ({rayon}) перевищив норму!\n"
+                        f"Поточне значення: {data.pm25_val} µg/m³.\n\n"
+                        f"Ми сповістимо вас знову не раніше ніж через {prof.update_interval} год."
+                    ),
                     from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=spisok_pocht,
+                    recipient_list=[user_email],
                     fail_silently=True,
                 )
-            except Exception as e:
-                print(f"Помилка відправки пошти: {e}")
+                prof.last_notif_sent = timezone.now()
+                prof.save()
+        except Exception as e:
+            print(f"Помилка відправки: {e}")
 
 def is_ai_admin(user):
 

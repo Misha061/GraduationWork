@@ -8,10 +8,9 @@ SCALER = joblib.load('air_scaler.gz')
 
 
 def get_forecast_from_ai(last_24_qs):
-    """Приймає QuerySet з 24 записів, повертає 6 чисел прогнозу"""
+
     df = pd.DataFrame(list(last_24_qs.values('pm25_val', 'pm10_val', 'vremya')))
 
-    # Додаємо ті ж часові фічі, що були при навчанні
     df['h_sin'] = np.sin(2 * np.pi * df['vremya'].dt.hour / 24)
     df['h_cos'] = np.cos(2 * np.pi * df['vremya'].dt.hour / 24)
     df['s_sin'] = np.sin(2 * np.pi * df['vremya'].dt.dayofyear / 365)

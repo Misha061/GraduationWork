@@ -70,7 +70,7 @@
                                 <td class="text-dark fw-bold">{{ item.real_pm25 }}</td>
                                 <td>{{ item.diff }}</td>
                                 <td>
-                                    {% if item.diff < 5 %}
+                                    {% if item.diff < 1 %}
                                         <span class="badge bg-success">Точно</span>
                                     {% else %}
                                         <span class="badge bg-danger">Похибка</span>

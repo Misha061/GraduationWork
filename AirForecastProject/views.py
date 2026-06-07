@@ -1,8 +1,6 @@
 import os
-
 from .forms import RegisterUserForm, LoginForm, EcoArticleForm, UserAccountUpdateForm, ForecastForm
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
-from .models import CityArea, AirSensorData, Forecast, SystemState, ModelTrainingLog
 from .Air_forecast_analisys_module.model_trainer import train_model
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import UpdateView, TemplateView
@@ -143,7 +141,7 @@ class MainDashboardView(ListView):
 
         base_qs = AirSensorData.objects.filter(city_id=city_id)
 
-        # Визначаємо вибірку
+
         latest_records = base_qs.order_by('-vremya')[:5]
         if requested_hour != 'now':
             hour_qs = base_qs.filter(vremya__hour=int(requested_hour)).order_by('-vremya')[:5]
@@ -178,10 +176,10 @@ class MainDashboardView(ListView):
         current_pm25 = round(t_pm25 / count, 2) if count > 0 else 0
         current_pm10 = round(t_pm10 / count, 2) if count > 0 else 0
 
-        # ФОРМУВАННЯ ІСТОРІЇ (Додаємо +3 години через localtime)
+
         history_list = []
         try:
-            # Беремо час зараз теж локальний
+
             now_local = timezone.localtime(timezone.now())
             seven_days_ago = now_local - timedelta(days=7)
 
@@ -190,10 +188,10 @@ class MainDashboardView(ListView):
             if h_qs.exists():
                 buckets = defaultdict(list)
                 for r in h_qs:
-                    # ОСЬ ТУТ: Конвертуємо час із бази (UTC) у київський (+3)
+
                     local_time = timezone.localtime(r.vremya)
 
-                    # Групуємо вже за локальною годиною
+
                     b_hour = (local_time.hour // 3) * 3
                     b_time = local_time.replace(hour=b_hour, minute=0, second=0, microsecond=0)
                     buckets[b_time].append(r)
@@ -201,7 +199,7 @@ class MainDashboardView(ListView):
                 for b_time in sorted(buckets.keys()):
                     recs = buckets[b_time]
                     history_list.append({
-                        # Тепер тут буде правильний час +3
+
                         'time': b_time.strftime("%d.%m %H:00"),
                         'pm25': round(sum(i.pm25_val for i in recs) / len(recs), 2),
                         'pm10': round(sum(i.pm10_val for i in recs) / len(recs), 2)
@@ -444,11 +442,11 @@ def trigger_retrain(request):
 
     def background_train():
 
-        if os.path.exists('air_forecast_model.h5'):
-            shutil.copy('air_forecast_model.h5', 'air_forecast_model_backup.h5')
+        if os.path.exists('Air_forecast_analisys_module/air_forecast_model.h5'):
+            shutil.copy('Air_forecast_analisys_module/air_forecast_model.h5', 'air_forecast_model_backup.h5')
 
         try:
-            train_model(model_name="5")  # Ваша функція з 5 шарами
+            train_model(model_name="5")
         finally:
             state.is_training = False
             state.save()
@@ -464,7 +462,7 @@ def trigger_retrain(request):
 @user_passes_test(is_ai_admin, login_url='/login/')
 def rollback_model(request):
     if os.path.exists('air_forecast_model_backup.h5'):
-        shutil.copy('air_forecast_model_backup.h5', 'air_forecast_model.h5')
+        shutil.copy('air_forecast_model_backup.h5', 'Air_forecast_analisys_module/air_forecast_model.h5')
     return redirect('ai_admin_dashboard')
 @user_passes_test(is_ai_admin, login_url='/login/')
 def api_training_status(request):

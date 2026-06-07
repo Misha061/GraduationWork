@@ -152,7 +152,7 @@ label {
     height: 500px;
     width: 100%;
     border-radius: var(--border-radius);
-    z-index: 1; /* Важливо для Leaflet, щоб він не перекривав меню */
+    z-index: 1;
     border: 2px solid var(--border-color);
 }
 

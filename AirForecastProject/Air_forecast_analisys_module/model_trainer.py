@@ -1,4 +1,3 @@
-import os
 import django
 import numpy as np
 import tensorflow as tf

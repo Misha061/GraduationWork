@@ -4,7 +4,7 @@
 <div class="card" style="max-width: 400px; margin: 50px auto; text-align: center;">
     <h2 style="color: #2e7d32;"><i class="fa-solid fa-right-to-bracket"></i> Вхід у систему</h2>
     
-    <!-- Блок для виводу повідомлень (наприклад, "Неправильний пароль") -->
+
     {% if messages %}
         <div style="color: #d32f2f; margin-bottom: 15px; font-weight: bold;">
             {% for message in messages %}
@@ -15,7 +15,6 @@
 
     <form method="POST" style="text-align: left;">
         {% csrf_token %}
-        <!-- Django автоматично виведе всі поля форми тут -->
         {{ form.as_p }}
         
         <button type="submit" class="btn-main" style="width: 100%; margin-top: 15px;">Увійти</button>

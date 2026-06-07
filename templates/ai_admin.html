@@ -90,7 +90,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Графік Loss
+
     const ctx = document.getElementById('lossChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
@@ -107,8 +107,7 @@
         },
         options: { plugins: { legend: { display: false } } }
     });
-
-    // Опитування прогресу
+    
     {% if state.is_training %}
     function checkProgress() {
         fetch('{% url "api_training_status" %}')

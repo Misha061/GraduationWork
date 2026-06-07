@@ -6,7 +6,6 @@
     
     <form method="POST" style="text-align: left;">
         {% csrf_token %}
-        <!-- Django автоматично виведе всі поля реєстрації -->
         {{ form.as_p }}
         
         <button type="submit" class="btn-main" style="width: 100%; margin-top: 15px;">Створити акаунт</button>

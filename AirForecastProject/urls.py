@@ -1,5 +1,4 @@
 from django.urls import path
-
 from . import views
 from .views import MainDashboardView, ArticleListView, AccountView, login_view, logout_view, register_view, \
     ForecastAnalysisView

@@ -64,6 +64,7 @@ class Forecast(models.Model):
 
     def get_absolute_url(self):
         return reverse('dashboard', kwargs={'pk': self.pk})
+
 class ModelTrainingLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     loss = models.FloatField()

@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+import time
 from .forms import AirSensorDataForm
 import requests
 from .models import CityArea
@@ -111,6 +112,7 @@ def fetch_and_save_current_data():
                 print(f"[Помилка] Не вдалося оновити {sensor_name}: {e}")
         else:
             print(f"[Увага] Локацію {sensor_name} пропущено: місто '{db_city_name}' не знайдено в базі даних.")
+            time.sleep(0.5)
 
 def load_ai_assets():
     global _AI_MODEL, _AI_SCALER
@@ -138,7 +140,7 @@ def get_prediction_for_location(location_coords, city_id, model, scaler):
     df = pd.DataFrame(list(qs.values('pm25_val', 'pm10_val', 'vremya', 'lat', 'lon')))
     df = df.sort_values('vremya')
 
-    # 3. Додаємо часові фічі
+
     df['h_sin'] = np.sin(2 * np.pi * df['vremya'].dt.hour / 24)
     df['h_cos'] = np.cos(2 * np.pi * df['vremya'].dt.hour / 24)
     df['s_sin'] = np.sin(2 * np.pi * df['vremya'].dt.dayofyear / 365)
@@ -146,7 +148,6 @@ def get_prediction_for_location(location_coords, city_id, model, scaler):
 
     features = ['pm25_val', 'pm10_val', 'lat', 'lon', 'h_sin', 'h_cos', 's_sin', 's_cos']
 
-    # Тепер помилки KeyError не буде, бо lat/lon є в df
     input_scaled = scaler.transform(df[features])
     input_reshaped = np.expand_dims(input_scaled, axis=0)
 
@@ -187,11 +188,10 @@ def get_city_wide_ai_forecast(city_id):
 
 def get_location_name_by_coords(lat, lon):
     for name, coords in VIRTUAL_SENSORS.items():
-        # Шукаємо збіг координат (з невеликою похибкою)
+
         if abs(coords[0] - lat) < 0.001 and abs(coords[1] - lon) < 0.001:
-            # Повертаємо частину після підкреслення (Kyiv_Center -> Center)
+
             full_name = name.split('_')[-1]
-            # Можна додати словник перекладу, якщо хочете українською
             translations = {
                 "Center": "Центр", "Troieshchyna": "Троєщина", "Obolon": "Оболонь",
                 "Osokorky": "Осокорки", "Solomyanka": "Солом'янка", "Tairove": "Таїрове",

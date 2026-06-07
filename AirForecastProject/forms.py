@@ -41,7 +41,7 @@ class UserAccountUpdateForm(forms.ModelForm):
     )
     class Meta:
         model = User
-        fields = ['first_name', 'password']
+        fields = ['email', 'password']
 
 class ForecastForm(forms.Form):
     model = Forecast

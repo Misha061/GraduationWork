@@ -260,6 +260,14 @@ class AccountView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def form_valid(self, form):
         user = form.save(commit=False)
         new_password = form.cleaned_data.get('password')
+        new_email = form.cleaned_data.get('email')
+
+        if new_email:
+            user.email = new_email
+            user.save()
+            update_session_auth_hash(self.request, user)
+        else:
+            user.save()
 
         if new_password:
             user.set_password(new_password)
@@ -267,6 +275,7 @@ class AccountView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             update_session_auth_hash(self.request, user)
         else:
             user.save()
+
 
         user_prof, created = UserProfile.objects.get_or_create(chelovek=self.request.user)
 
@@ -327,10 +336,10 @@ class ForecastAnalysisView(TemplateView):
                     for res in ai_results:
                         for h in [1, 3, 24]:
                             h_key = f'{h}h'
-                            # У вашому ForecastAnalysisView (views.py)
+
                             new_forecasts.append(Forecast(
                                 city=city,
-                                location_name=res['location_name'],  # Записуємо назву з результатів AI
+                                location_name=res['location_name'],
                                 lat=res['lat'],
                                 lon=res['lon'],
                                 predicted_pm25=res['pm25'][h_key],

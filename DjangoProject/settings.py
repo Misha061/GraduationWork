@@ -84,7 +84,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '10252294@stud.op.edu.ua'
 EMAIL_HOST_PASSWORD = 'harcrwjapyzmtdsg'
-
+DEFAULT_FROM_EMAIL = '10252294@stud.op.edu.ua'
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators

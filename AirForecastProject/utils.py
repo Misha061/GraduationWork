@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
 from .models import AirSensorData
+import threading
 
 API_KEY = "8f68d6d051d505bcaf5da7f85b7858f0"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -123,7 +124,6 @@ def load_ai_assets():
             _AI_MODEL = load_model(MODEL_PATH, compile=False)
             _AI_SCALER = joblib.load(SCALER_PATH)
     return _AI_MODEL, _AI_SCALER
-
 
 def get_prediction_for_location(location_coords, city_id, model, scaler):
     lat, lon = location_coords

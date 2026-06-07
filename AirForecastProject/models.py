@@ -35,6 +35,7 @@ class UserProfile(models.Model):
     update_interval = models.FloatField(default=1.0)
     send_notifs = models.BooleanField(default=False)
     user_admin = models.BooleanField(default=False)
+    last_notif_sent = models.DateTimeField(null=True, blank=True)
     def get_absolute_url(self):
         return reverse('dashboard', kwargs={'pk': self.pk})
 

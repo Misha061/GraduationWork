@@ -106,7 +106,7 @@ def fetch_and_save_current_data():
 
 
                     save_new_air_data(city_obj.id, pm25, pm10, lat, lon)
-                    print(f"[OK] {sensor_name} -> збережено (PM2.5: {pm25}, lat: {lat}, lon: {lon})")
+                    print(f"[OK] {sensor_name} -> збережено (PM2.5: {pm25},PM10: {pm10}, lat: {lat}, lon: {lon})")
                 else:
                     print(f"[Помилка API] Код {response.status_code} для {sensor_name}")
             except Exception as e:

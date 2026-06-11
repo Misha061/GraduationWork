@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from .models import CityArea, AirSensorData, EcoArticle, Forecast
 
@@ -7,7 +7,7 @@ from .models import CityArea, AirSensorData, EcoArticle, Forecast
 class RegisterUserForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'email']
 
 class LoginForm(forms.Form):
     email = forms.EmailField(
@@ -34,14 +34,14 @@ class EcoArticleForm(forms.ModelForm):
         model = EcoArticle
         fields = ['zagolovok', 'soderzhanie', 'url_article']
 
-class UserAccountUpdateForm(forms.ModelForm):
+class UserAccountUpdateForm(UserChangeForm):
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput(attrs={'placeholder': 'Залиште пустим, щоб не змінювати'})
     )
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['email']
 
 class ForecastForm(forms.Form):
     model = Forecast

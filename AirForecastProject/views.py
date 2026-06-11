@@ -259,23 +259,21 @@ class AccountView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         user = form.save(commit=False)
+
         new_password = form.cleaned_data.get('password')
         new_email = form.cleaned_data.get('email')
 
         if new_email:
             user.email = new_email
-            user.save()
-            update_session_auth_hash(self.request, user)
-        else:
-            user.save()
+
 
         if new_password:
             user.set_password(new_password)
-            user.save()
-            update_session_auth_hash(self.request, user)
-        else:
-            user.save()
 
+        user.save()
+
+        if new_password or new_email:
+            update_session_auth_hash(self.request, user)
 
         user_prof, created = UserProfile.objects.get_or_create(chelovek=self.request.user)
 

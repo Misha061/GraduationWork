@@ -1,7 +1,10 @@
 import django
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.callbacks import EarlyStopping
 import os
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE_PATH = os.path.join(BASE_DIR, 'Air_forecast_analisys_module', 'processed_data.npy')
 from tensorflow.keras.models import Sequential
@@ -49,8 +52,15 @@ class DjangoProgressCallback(tf.keras.callbacks.Callback):
         state = SystemState.objects.get(id=self.state_id)
         state.is_training = False
         state.progress = 100
+
+
+        stopped_epoch = self.model.stop_training
+        if stopped_epoch:
+            print(f"\nРання зупинка: модель перестала покращуватись.")
+        else:
+            print(f"\nНавчання завершено успішно. Модель збережена.")
+
         state.save()
-        print(f"\nНавчання завершено успішно. Модель збережена.")
 
 
 def train_model(model_name="5"):
@@ -99,12 +109,20 @@ def train_model(model_name="5"):
     opt = tf.keras.optimizers.Adam(learning_rate=0.0005)
     model.compile(optimizer=opt, loss='mse', metrics=['mae'])
 
+    early_stop = EarlyStopping(
+        monitor='val_loss',
+        patience=5,
+        min_delta=0.0001,
+        restore_best_weights=True,
+        verbose=1
+    )
+
     model.fit(
         X_train, y_train,
         epochs=epochs_count,
         validation_data=(X_test, y_test),
         batch_size=32,
-        callbacks=[progress_callback],
+        callbacks=[progress_callback, early_stop],
         verbose=1
     )
 

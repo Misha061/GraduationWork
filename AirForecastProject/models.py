@@ -49,7 +49,7 @@ class EcoArticle(models.Model):
 
 class Forecast(models.Model):
     city = models.ForeignKey(CityArea, on_delete=models.CASCADE, related_name='city_forecasts')
-    location_name = models.CharField(max_length=100, default="Невідома локація") # НОВЕ ПОЛЕ
+    location_name = models.CharField(max_length=100, default="Невідома локація")
     lat = models.FloatField()
     lon = models.FloatField()
     predicted_pm25 = models.FloatField()

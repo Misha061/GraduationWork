@@ -449,8 +449,8 @@ def trigger_retrain(request):
 
     def background_train():
 
-        if os.path.exists('air_forecast_model.h5'):
-            shutil.copy('air_forecast_model.h5', 'air_forecast_model_backup.h5')
+        if os.path.exists('Air_forecast_analisys_module/air_forecast_model.h5'):
+            shutil.copy('Air_forecast_analisys_module/air_forecast_model.h5', 'air_forecast_model_backup.h5')
 
         try:
             train_model(model_name="5")
@@ -469,7 +469,7 @@ def trigger_retrain(request):
 @user_passes_test(is_ai_admin, login_url='/login/')
 def rollback_model(request):
     if os.path.exists('air_forecast_model_backup.h5'):
-        shutil.copy('air_forecast_model_backup.h5', 'air_forecast_model.h5')
+        shutil.copy('air_forecast_model_backup.h5', 'Air_forecast_analisys_module/air_forecast_model.h5')
     return redirect('ai_admin_dashboard')
 @user_passes_test(is_ai_admin, login_url='/login/')
 def api_training_status(request):
